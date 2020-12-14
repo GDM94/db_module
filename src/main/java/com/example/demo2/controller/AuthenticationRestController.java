@@ -1,9 +1,11 @@
 package com.example.demo2.controller;
 
 
-import com.example.asset_test.security.JwtAuthenticationRequest;
-import com.example.asset_test.security.JwtTokenUtil;
-import com.example.demo2.services.impl.JwtAuthenticationResponse;
+
+import com.example.communication.model.JwtAuthenticationRequest;
+import com.example.demo2.security.JwtTokenUtil;
+import com.example.demo2.security.JwtAuthenticationResponse;
+import com.example.demo2.services.impl.JwtAuthenticationRequestImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,52 +29,17 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 public class AuthenticationRestController {
 
-    @Value("${jwt.header}")
-    private String tokenHeader;
-
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
+    private JwtAuthenticationRequestImpl jwtAuthenticationRequest;
 
     @RequestMapping(value = "public/login", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtAuthenticationRequest authenticationRequest, HttpServletResponse response) throws AuthenticationException, JsonProcessingException {
-
-        // Effettuo l autenticazione
-        final Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authenticationRequest.getUsername(),
-                        authenticationRequest.getPassword()
-                )
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // Genero Token
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-        final String token = jwtTokenUtil.generateToken(userDetails);
-        response.setHeader(tokenHeader,token);
-        // Ritorno il token
-        return ResponseEntity.ok(new JwtAuthenticationResponse(userDetails.getUsername(),userDetails.getAuthorities()));
+        return jwtAuthenticationRequest.createAuthenticationToken(authenticationRequest, response);
     }
 
     @RequestMapping(value = "protected/refresh-token", method = RequestMethod.GET)
     public ResponseEntity<?> refreshAndGetAuthenticationToken(HttpServletRequest request, HttpServletResponse response) {
-        String token = request.getHeader(tokenHeader);
-        UserDetails userDetails =
-                (UserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (jwtTokenUtil.canTokenBeRefreshed(token)) {
-            String refreshedToken = jwtTokenUtil.refreshToken(token);
-            response.setHeader(tokenHeader,refreshedToken);
-
-            return ResponseEntity.ok(new JwtAuthenticationResponse(userDetails.getUsername(),userDetails.getAuthorities()));
-        } else {
-            return ResponseEntity.badRequest().body(null);
-        }
+        return jwtAuthenticationRequest.refreshAndGetAuthenticationToken(request,response);
     }
 
 }

@@ -1,7 +1,7 @@
 package com.example.demo2.security;
 
 
-import com.example.communication.model.JwtUser;
+import com.example.demo2.security.dto.JwtUser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;

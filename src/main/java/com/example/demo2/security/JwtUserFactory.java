@@ -2,7 +2,7 @@ package com.example.demo2.security;
 
 
 import com.example.communication.model.Authority;
-import com.example.communication.model.JwtUser;
+import com.example.demo2.security.dto.JwtUser;
 import com.example.communication.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
