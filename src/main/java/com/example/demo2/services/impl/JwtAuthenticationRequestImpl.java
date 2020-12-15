@@ -1,12 +1,14 @@
 package com.example.demo2.services.impl;
 
 import com.example.communication.model.JwtAuthenticationRequest;
+import com.example.communication.model.JwtAuthenticationResponse;
 import com.example.communication.services.JwtAutenticationService;
-import com.example.demo2.security.JwtAuthenticationResponse;
 import com.example.demo2.security.JwtTokenUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,9 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,7 +38,7 @@ public class JwtAuthenticationRequestImpl implements JwtAutenticationService {
     private UserDetailsService userDetailsService;
 
     @Override
-    public ResponseEntity<?> createAuthenticationToken(JwtAuthenticationRequest authenticationRequest, HttpServletResponse response) throws AuthenticationException, JsonProcessingException {
+    public ResponseEntity<JwtAuthenticationResponse> createAuthenticationToken(JwtAuthenticationRequest authenticationRequest, HttpServletResponse response) throws AuthenticationException, JsonProcessingException {
 
         // Effettuo l autenticazione
         final Authentication authentication = authenticationManager.authenticate(
@@ -53,13 +52,16 @@ public class JwtAuthenticationRequestImpl implements JwtAutenticationService {
         // Genero Token
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
         final String token = jwtTokenUtil.generateToken(userDetails);
-        response.setHeader(tokenHeader,token);
         // Ritorno il token
-        return ResponseEntity.ok(new JwtAuthenticationResponse(userDetails.getUsername(),userDetails.getAuthorities()));
+        //response.setHeader(tokenHeader,token);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(tokenHeader, token);
+        final JwtAuthenticationResponse jwtResponse = new JwtAuthenticationResponse(userDetails.getUsername(),userDetails.getAuthorities());
+        return new ResponseEntity<JwtAuthenticationResponse>(jwtResponse, headers, HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<?> refreshAndGetAuthenticationToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<JwtAuthenticationResponse> refreshAndGetAuthenticationToken(HttpServletRequest request, HttpServletResponse response) {
         String token = request.getHeader(tokenHeader);
         UserDetails userDetails =
                 (UserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -67,10 +69,12 @@ public class JwtAuthenticationRequestImpl implements JwtAutenticationService {
         if (jwtTokenUtil.canTokenBeRefreshed(token)) {
             String refreshedToken = jwtTokenUtil.refreshToken(token);
             response.setHeader(tokenHeader,refreshedToken);
-
-            return ResponseEntity.ok(new JwtAuthenticationResponse(userDetails.getUsername(),userDetails.getAuthorities()));
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(tokenHeader, token);
+            final JwtAuthenticationResponse jwtResponse = new JwtAuthenticationResponse(userDetails.getUsername(),userDetails.getAuthorities());
+            return new ResponseEntity<JwtAuthenticationResponse>(jwtResponse, headers, HttpStatus.CREATED);
         } else {
-            return ResponseEntity.badRequest().body(null);
+            return null;
         }
     }
 
