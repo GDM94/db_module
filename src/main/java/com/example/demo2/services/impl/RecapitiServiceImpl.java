@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class RecapitiServiceImpl implements RecapitiService {
@@ -36,23 +37,25 @@ public class RecapitiServiceImpl implements RecapitiService {
         recapitiTelefonici.setIdana(idana);
         recapitiTelefonici.setTipo_recapito(tipo_recapito);
         recapitiTelefonici.setNumero_recapito(numero_recapito);
-        Anagrafica anagrafica = new Anagrafica();
-        anagrafica.setIdana(idana);
-        recapitiTelefonici.setAnagrafica(anagrafica);
+        Optional<Anagrafica> anagrafica = anagraficaRepository.findById(idana);
+        anagrafica.ifPresent(ana -> {
+            recapitiTelefonici.setAnagrafica(ana);
+        });
+
         recapitiRepository.save(recapitiTelefonici);
         return recapitiTelefonici;
     }
 
     @Override
-    public Boolean deleteRecapiti(long idreca){
-        Optional<RecapitiTelefonici> recapitiTelefonici = recapitiRepository.findById(idreca);
-        final boolean[] condition = {false};
+    public boolean deleteRecapiti(long id){
+        Optional<RecapitiTelefonici> recapitiTelefonici = recapitiRepository.findById(id);
+        AtomicBoolean condition = new AtomicBoolean(false);
         recapitiTelefonici.ifPresent(r -> {
-            recapitiRepository.deleteById(idreca);
-            condition[0] = true;
+            recapitiRepository.deleteById(id);
+            condition.set(true);
         });
 
-        return condition[0];
+        return condition.get();
     }
 
     @Override

@@ -10,7 +10,7 @@ public interface RecapitiService {
     public Optional<RecapitiTelefonici> recapitoById(Long id);
     public List<RecapitiTelefonici> recapitoAll();
     public RecapitiTelefonici newRecapiti(Long id, Long idana, String tipo_recapito, String numero_recapito);
-    public Boolean deleteRecapiti(long idreca);
+    public boolean deleteRecapiti(long id);
     public Optional<RecapitiTelefonici> updateRecapiti(Long id, String tipo_recapito, String numero_recapito);
 
 }
