@@ -43,6 +43,7 @@ public class GraphqlController {
     public Map<String,Object> execute(@RequestBody Map<String, String> request, HttpServletRequest raw)
             throws GraphQLException {
         ExecutionResult result = graphQL.execute(request.get("query"));
+        System.out.println(result.getData().toString());
         return result.getData();
 
     }
