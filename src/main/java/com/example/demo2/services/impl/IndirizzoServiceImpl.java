@@ -3,9 +3,9 @@ package com.example.demo2.services.impl;
 
 import com.example.communication.model.Anagrafica;
 import com.example.communication.model.Indirizzo;
-import com.example.communication.services.IndrizzoService;
 import com.example.demo2.repositories.AnagraficaRepository;
 import com.example.demo2.repositories.IndirizzoRepository;
+import com.example.demo2.services.IndrizzoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

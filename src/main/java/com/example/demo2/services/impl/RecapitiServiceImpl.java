@@ -2,9 +2,9 @@ package com.example.demo2.services.impl;
 
 import com.example.communication.model.Anagrafica;
 import com.example.communication.model.RecapitiTelefonici;
-import com.example.communication.services.RecapitiService;
 import com.example.demo2.repositories.AnagraficaRepository;
 import com.example.demo2.repositories.RecapitiRepository;
+import com.example.demo2.services.RecapitiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
