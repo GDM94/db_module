@@ -1,6 +1,7 @@
 package com.example.demo2.resolver;
 
 
+import com.example.communication.bean.AnagraficaBean;
 import com.example.communication.model.Anagrafica;
 import com.example.demo2.services.AnagraficaService;
 import io.leangen.graphql.annotations.GraphQLMutation;
@@ -18,12 +19,12 @@ public class AnagraficaResolver {
     private AnagraficaService anagraficaService;
 
     @GraphQLMutation
-    public Anagrafica newAnagrafica(Long id, String nome, String cognome) {
+    public AnagraficaBean newAnagrafica(Long id, String nome, String cognome) {
         return anagraficaService.newAnagrafica(id, nome, cognome);
     }
 
     @GraphQLMutation
-    public Optional<Anagrafica> updateAnagrafica(Long id, String nome, String cognome) {
+    public AnagraficaBean updateAnagrafica(Long id, String nome, String cognome) {
         return anagraficaService.updateAnagrafica(id, nome, cognome);
     }
 
@@ -33,12 +34,12 @@ public class AnagraficaResolver {
     }
 
     @GraphQLQuery
-    public Optional<Anagrafica> anagraficaById(Long id) {
+    public AnagraficaBean anagraficaById(Long id) {
         return anagraficaService.anagraficaById(id);
     }
 
     @GraphQLQuery
-    public List<Anagrafica> anagraficaAll() {
+    public List<AnagraficaBean> anagraficaAll() {
         return anagraficaService.anagraficaAll();
     }
 

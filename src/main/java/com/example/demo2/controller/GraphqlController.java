@@ -1,5 +1,6 @@
 package com.example.demo2.controller;
 
+import com.example.demo2.DbModuleApplication;
 import com.example.demo2.resolver.AnagraficaResolver;
 import com.example.demo2.resolver.IndirizziResolver;
 import com.example.demo2.resolver.RecapitiResolver;
@@ -11,16 +12,22 @@ import io.leangen.graphql.GraphQLSchemaGenerator;
 import io.leangen.graphql.metadata.strategy.query.AnnotatedResolverBuilder;
 import io.leangen.graphql.metadata.strategy.query.PublicResolverBuilder;
 import io.leangen.graphql.metadata.strategy.value.jackson.JacksonValueMapperFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
 public class GraphqlController {
+
+    private static final Logger logger = LoggerFactory.getLogger(DbModuleApplication.class);
+
     private final GraphQL graphQL;
 
     @Autowired
@@ -40,12 +47,13 @@ public class GraphqlController {
     }
 
     @PostMapping(value = "/graphql")
-    public Map<String,Object> execute(@RequestBody Map<String, String> request, HttpServletRequest raw)
+    public Object execute(@RequestBody Map<String, String> request, HttpServletRequest raw)
             throws GraphQLException {
         ExecutionResult result = graphQL.execute(request.get("query"));
-        System.out.println(result.getData().toString());
-        return result.getData();
-
+        LinkedHashMap<String,?> r = result.getData();
+        Object object = r.values().iterator().next();
+        logger.info(object.toString());
+        return object;
     }
 
 }
