@@ -1,5 +1,6 @@
 package com.example.demo2.resolver;
 
+import com.example.communication.bean.RecapitiBean;
 import com.example.communication.model.RecapitiTelefonici;
 import com.example.demo2.services.RecapitiService;
 import io.leangen.graphql.annotations.GraphQLMutation;
@@ -17,17 +18,17 @@ public class RecapitiResolver {
     RecapitiService recapitiService;
 
     @GraphQLQuery
-    public Optional<RecapitiTelefonici> recapitoById(Long id){
+    public RecapitiBean recapitoById(Long id){
         return recapitiService.recapitoById(id);
     }
 
     @GraphQLQuery
-    public List<RecapitiTelefonici> recapitoAll(){
+    public List<RecapitiBean> recapitoAll(){
         return recapitiService.recapitoAll();
     }
 
     @GraphQLMutation
-    public RecapitiTelefonici newRecapiti(Long id, Long idana, String tipo_recapito, String numero_recapito){
+    public RecapitiBean newRecapiti(Long id, Long idana, String tipo_recapito, String numero_recapito){
         return recapitiService.newRecapiti(id, idana, tipo_recapito, numero_recapito);
     }
 
@@ -37,7 +38,7 @@ public class RecapitiResolver {
     }
 
     @GraphQLMutation
-    public Optional<RecapitiTelefonici> updateRecapiti(Long id, String tipo_recapito, String numero_recapito){
+    public RecapitiBean updateRecapiti(Long id, String tipo_recapito, String numero_recapito){
         return recapitiService.updateRecapiti(id, tipo_recapito, numero_recapito);
     }
 

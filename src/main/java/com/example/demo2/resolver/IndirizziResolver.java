@@ -1,7 +1,7 @@
 package com.example.demo2.resolver;
 
 
-import com.example.communication.model.Indirizzo;
+import com.example.communication.bean.IndirizziBean;
 import com.example.demo2.services.IndrizzoService;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
@@ -17,23 +17,23 @@ public class IndirizziResolver {
     IndrizzoService idrizzoService;
 
     @GraphQLQuery
-    public Optional<Indirizzo> indirizzoById(Long id){
+    public IndirizziBean indirizzoById(Long id){
         return idrizzoService.indirizzoById(id);
     }
 
     @GraphQLQuery
-    public List<Indirizzo> indirizzoAll(){
+    public List<IndirizziBean> indirizzoAll(){
         return idrizzoService.indirizzoAll();
     }
 
 
     @GraphQLMutation
-    public Indirizzo newIndirizzo(Long id, Long idana, String descrizione){
+    public IndirizziBean newIndirizzo(Long id, Long idana, String descrizione){
         return  idrizzoService.newIndirizzo(id, idana, descrizione);
     }
 
     @GraphQLMutation
-    public Optional<Indirizzo> updateIndirizzo(Long id, String descrizione){
+    public IndirizziBean updateIndirizzo(Long id, String descrizione){
         return idrizzoService.updateIndirizzo(id, descrizione);
     }
 

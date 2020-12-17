@@ -5,13 +5,12 @@ import com.example.communication.bean.AnagraficaBean;
 import com.example.communication.model.Anagrafica;
 
 import com.example.demo2.repositories.AnagraficaRepository;
-import com.example.demo2.services.AnagraficaMapper;
+import com.example.demo2.services.mapper.AnagraficaMapper;
 import com.example.demo2.services.AnagraficaService;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;

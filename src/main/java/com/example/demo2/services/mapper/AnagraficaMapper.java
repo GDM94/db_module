@@ -1,4 +1,4 @@
-package com.example.demo2.services;
+package com.example.demo2.services.mapper;
 
 
 import com.example.communication.bean.AnagraficaBean;
