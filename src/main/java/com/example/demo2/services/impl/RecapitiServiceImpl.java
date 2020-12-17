@@ -47,6 +47,12 @@ public class RecapitiServiceImpl implements RecapitiService {
     @Override
     public List<RecapitiBean> recapitoAll(){
         List<RecapitiTelefonici> recapitiTelefonicis = recapitiRepository.findAll();
+        recapitiTelefonicis.forEach(r->{
+            Optional<Anagrafica> anagrafica = anagraficaRepository.findById(r.getIdana());
+            anagrafica.ifPresent(a->{
+                r.setAnagrafica(a);
+            });
+        });
         List<RecapitiBean> recapitiBeans = recapitiMapper.listEntityToListBean(recapitiTelefonicis);
         return recapitiBeans;
     }

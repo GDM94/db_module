@@ -19,7 +19,7 @@ public interface IndirizziMapper {
     List<IndirizziBean> listEntityToListBean(List<Indirizzo> indirizzos);
     List<Indirizzo> ListBeanToListEntity(List<IndirizziBean> indirizziBeans);
 
-    @Mapping(source = "anagrafica", target = "anagraficaBean")
+    @Mapping(source = "anagrafica", target = "anagrafica")
     IndirizziBean entityToBean(Indirizzo indirizzo);
     Indirizzo beanToEntity(IndirizziBean indirizziBean);
 

@@ -17,7 +17,7 @@ public interface RecapitiMapper {
     List<RecapitiBean> listEntityToListBean(List<RecapitiTelefonici> recapitiTelefonicis);
     List<RecapitiTelefonici> ListBeanToListEntity(List<RecapitiBean> recapitiBeans);
 
-    @Mapping(target = "anagraficaBean", source = "anagrafica")
+    @Mapping(target = "anagrafica", source = "anagrafica")
     RecapitiBean entityToBean(RecapitiTelefonici recapitiTelefonici);
     RecapitiTelefonici beanToEntity(RecapitiBean recapitiBean);
 }

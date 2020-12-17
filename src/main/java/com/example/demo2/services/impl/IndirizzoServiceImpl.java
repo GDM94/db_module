@@ -4,12 +4,15 @@ package com.example.demo2.services.impl;
 import com.example.communication.bean.IndirizziBean;
 import com.example.communication.model.Anagrafica;
 import com.example.communication.model.Indirizzo;
+import com.example.demo2.DbModuleApplication;
 import com.example.demo2.repositories.AnagraficaRepository;
 import com.example.demo2.repositories.IndirizzoRepository;
 import com.example.demo2.services.IndrizzoService;
 import com.example.demo2.services.mapper.AnagraficaMapper;
 import com.example.demo2.services.mapper.IndirizziMapper;
 import org.mapstruct.factory.Mappers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +32,8 @@ public class IndirizzoServiceImpl implements IndrizzoService {
 
     private final IndirizziMapper indirizziMapper= Mappers.getMapper(IndirizziMapper.class);
 
+    private static final Logger logger = LoggerFactory.getLogger(DbModuleApplication.class);
+
     @Override
     public IndirizziBean indirizzoById(Long id){
         Optional<Indirizzo> result_query = indirizzoRepository.findById(id);
@@ -37,8 +42,13 @@ public class IndirizzoServiceImpl implements IndrizzoService {
             indirizzo.setIdaddress(q.getIdaddress());
             indirizzo.setIdana(q.getIdana());
             indirizzo.setDescrizione(q.getDescrizione());
-            indirizzo.setAnagrafica(q.getAnagrafica());
+            Optional<Anagrafica> anagrafica = anagraficaRepository.findById(q.getIdana());
+            anagrafica.ifPresent(a->{
+                indirizzo.setAnagrafica(a);
+            });
         });
+
+        logger.info(indirizzo.toString());
         if (result_query.isPresent()){
             IndirizziBean indirizziBean = indirizziMapper.entityToBean(indirizzo);
             return indirizziBean;
@@ -52,6 +62,13 @@ public class IndirizzoServiceImpl implements IndrizzoService {
     @Override
     public List<IndirizziBean> indirizzoAll(){
         List<Indirizzo> indirizzos = indirizzoRepository.findAll();
+        indirizzos.forEach(i->{
+            Optional<Anagrafica> anagrafica = anagraficaRepository.findById(i.getIdana());
+            anagrafica.ifPresent(a->{
+                i.setAnagrafica(a);
+            });
+        });
+        logger.info(indirizzos.toString());
         List<IndirizziBean> indirizziBeans = indirizziMapper.listEntityToListBean(indirizzos);
         return indirizziBeans;
     }
