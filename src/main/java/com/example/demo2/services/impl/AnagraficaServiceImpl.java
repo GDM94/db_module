@@ -5,6 +5,7 @@ import com.example.communication.bean.AnagraficaBean;
 import com.example.communication.model.Anagrafica;
 
 import com.example.demo2.repositories.AnagraficaRepository;
+import com.example.demo2.repositories.redis.AnagraficaRepositoryRedis;
 import com.example.demo2.services.mapper.AnagraficaMapper;
 import com.example.demo2.services.AnagraficaService;
 import org.mapstruct.factory.Mappers;
@@ -22,12 +23,14 @@ public class AnagraficaServiceImpl implements AnagraficaService {
     @Autowired
     private AnagraficaRepository anagraficaRepository;
 
+    @Autowired
+    private AnagraficaRepositoryRedis anagraficaRepositoryRedis;
+
     private AnagraficaMapper anagraficaMapper= Mappers.getMapper(AnagraficaMapper.class);
 
     @Override
-    public AnagraficaBean newAnagrafica(Long id, String nome, String cognome) {
+    public AnagraficaBean newAnagrafica(String nome, String cognome) {
         Anagrafica anagrafica = new Anagrafica();
-        anagrafica.setIdana(id);
         anagrafica.setNome(nome);
         anagrafica.setCognome(cognome);
         Date date = new Date();
@@ -35,6 +38,8 @@ public class AnagraficaServiceImpl implements AnagraficaService {
         anagrafica.setDate_agg(date);
         anagraficaRepository.save(anagrafica);
         AnagraficaBean anagraficaBean = anagraficaMapper.entityToBean(anagrafica);
+        //AnagraficaRedis anagraficaRedis = anagraficaMapper.entityToRedis(anagrafica);
+        anagraficaRepositoryRedis.save(anagraficaBean);
         return anagraficaBean;
     }
 
@@ -73,24 +78,32 @@ public class AnagraficaServiceImpl implements AnagraficaService {
 
     @Override
     public AnagraficaBean anagraficaById(Long id) {
-        Optional<Anagrafica> result_query = anagraficaRepository.findById(id);
-        final Anagrafica anagrafica = new Anagrafica();
-        result_query.ifPresent(q->{
-            anagrafica.setIdana(q.getIdana());
-            anagrafica.setNome(q.getNome());
-            anagrafica.setCognome(q.getCognome());
-        });
 
-        if (result_query.isPresent()) {
-            AnagraficaBean anagraficaBean = anagraficaMapper.entityToBean(anagrafica);
-            return anagraficaBean;
-        }else {
-            return null;
+        Optional<AnagraficaBean> result_query_redis = anagraficaRepositoryRedis.findById(id);
+        if (result_query_redis.isPresent()){
+            AnagraficaBean anagraficaRedis = new AnagraficaBean();
+            result_query_redis.ifPresent(q->{
+                anagraficaRedis.setIdana(q.getIdana());
+                anagraficaRedis.setNome(q.getNome());
+                anagraficaRedis.setCognome(q.getCognome());
+            });
+            //AnagraficaBean anagraficaBean = anagraficaMapper.redisToBean(anagraficaRedis);
+            return anagraficaRedis;
+        } else{
+            Optional<Anagrafica> result_query = anagraficaRepository.findById(id);
+            final Anagrafica anagrafica = new Anagrafica();
+            result_query.ifPresent(q->{
+                anagrafica.setIdana(q.getIdana());
+                anagrafica.setNome(q.getNome());
+                anagrafica.setCognome(q.getCognome());
+            });
+            if (result_query.isPresent()) {
+                AnagraficaBean anagraficaBean = anagraficaMapper.entityToBean(anagrafica);
+                return anagraficaBean;
+            }else {
+                return null;
+            }
         }
-
-
-
-
     }
 
 

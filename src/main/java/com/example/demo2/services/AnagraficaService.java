@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface AnagraficaService {
 
-    public AnagraficaBean newAnagrafica(Long id, String nome, String cognome);
+    public AnagraficaBean newAnagrafica(String nome, String cognome);
     public boolean deleteAnagrafica(Long id);
     public AnagraficaBean updateAnagrafica(Long id, String nome, String cognome);
     public AnagraficaBean anagraficaById(Long id);

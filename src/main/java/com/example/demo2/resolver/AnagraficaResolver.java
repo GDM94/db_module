@@ -19,8 +19,8 @@ public class AnagraficaResolver {
     private AnagraficaService anagraficaService;
 
     @GraphQLMutation
-    public AnagraficaBean newAnagrafica(Long id, String nome, String cognome) {
-        return anagraficaService.newAnagrafica(id, nome, cognome);
+    public AnagraficaBean newAnagrafica(String nome, String cognome) {
+        return anagraficaService.newAnagrafica(nome, cognome);
     }
 
     @GraphQLMutation

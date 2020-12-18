@@ -17,4 +17,6 @@ public interface AnagraficaMapper {
     Anagrafica beanToEntity(AnagraficaBean anagraficaBean);
 
 
+
+
 }
