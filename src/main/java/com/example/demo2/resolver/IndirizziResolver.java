@@ -28,8 +28,8 @@ public class IndirizziResolver {
 
 
     @GraphQLMutation
-    public IndirizziBean newIndirizzo(Long id, Long idana, String descrizione){
-        return  idrizzoService.newIndirizzo(id, idana, descrizione);
+    public IndirizziBean newIndirizzo( Long idana, String descrizione){
+        return  idrizzoService.newIndirizzo(idana, descrizione);
     }
 
     @GraphQLMutation

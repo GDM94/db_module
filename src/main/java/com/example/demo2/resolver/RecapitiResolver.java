@@ -28,8 +28,8 @@ public class RecapitiResolver {
     }
 
     @GraphQLMutation
-    public RecapitiBean newRecapiti(Long id, Long idana, String tipo_recapito, String numero_recapito){
-        return recapitiService.newRecapiti(id, idana, tipo_recapito, numero_recapito);
+    public RecapitiBean newRecapiti(Long idana, String tipo_recapito, String numero_recapito){
+        return recapitiService.newRecapiti(idana, tipo_recapito, numero_recapito);
     }
 
     @GraphQLMutation

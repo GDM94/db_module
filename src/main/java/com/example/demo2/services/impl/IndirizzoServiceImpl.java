@@ -8,7 +8,6 @@ import com.example.demo2.DbModuleApplication;
 import com.example.demo2.repositories.AnagraficaRepository;
 import com.example.demo2.repositories.IndirizzoRepository;
 import com.example.demo2.services.IndrizzoService;
-import com.example.demo2.services.mapper.AnagraficaMapper;
 import com.example.demo2.services.mapper.IndirizziMapper;
 import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
@@ -74,9 +73,8 @@ public class IndirizzoServiceImpl implements IndrizzoService {
     }
 
     @Override
-    public IndirizziBean newIndirizzo(Long id, Long idana, String descrizione){
+    public IndirizziBean newIndirizzo( Long idana, String descrizione){
         Indirizzo indirizzo = new Indirizzo();
-        indirizzo.setIdaddress(id);
         indirizzo.setIdana(idana);
         indirizzo.setDescrizione(descrizione);
         Date date = new Date();

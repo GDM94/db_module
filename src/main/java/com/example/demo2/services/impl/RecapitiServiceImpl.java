@@ -58,9 +58,8 @@ public class RecapitiServiceImpl implements RecapitiService {
     }
 
     @Override
-    public RecapitiBean newRecapiti(Long id, Long idana, String tipo_recapito, String numero_recapito){
+    public RecapitiBean newRecapiti( Long idana, String tipo_recapito, String numero_recapito){
         RecapitiTelefonici recapitiTelefonici = new RecapitiTelefonici();
-        recapitiTelefonici.setIdreca(id);
         recapitiTelefonici.setIdana(idana);
         recapitiTelefonici.setTipo_recapito(tipo_recapito);
         recapitiTelefonici.setNumero_recapito(numero_recapito);
