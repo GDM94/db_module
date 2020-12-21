@@ -30,7 +30,7 @@ public class AnagraficaResolver {
     }
 
     @GraphQLMutation
-    public boolean deleteAnagrafica(Long id) {
+    public boolean deleteAnagrafica(Long id) throws IOException {
         return anagraficaService.deleteAnagrafica(id);
     }
 

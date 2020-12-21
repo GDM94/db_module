@@ -5,12 +5,9 @@ import com.example.communication.bean.AnagraficaBean;
 import com.example.communication.model.Anagrafica;
 
 import com.example.demo2.repositories.AnagraficaRepository;
-import com.example.demo2.repositories.redis.AnagraficaRepositoryRedis;
-import com.example.demo2.services.impl.memcached.AnagraficaMemcahedImpl;
 import com.example.demo2.services.mapper.AnagraficaMapper;
 import com.example.demo2.services.AnagraficaService;
-import com.example.demo2.services.memchaced.AnagraficaMemcached;
-import net.spy.memcached.MemcachedClient;
+import com.example.demo2.services.memcached.AnagraficaMemcached;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,8 +24,6 @@ public class AnagraficaServiceImpl implements AnagraficaService {
     @Autowired
     private AnagraficaRepository anagraficaRepository;
 
-    @Autowired
-    private AnagraficaRepositoryRedis anagraficaRepositoryRedis;
 
     @Autowired
     private AnagraficaMemcached anagraficaMemcached;
@@ -45,7 +40,6 @@ public class AnagraficaServiceImpl implements AnagraficaService {
         anagrafica.setDate_agg(date);
         anagraficaRepository.save(anagrafica);
         AnagraficaBean anagraficaBean = anagraficaMapper.entityToBean(anagrafica);
-        anagraficaRepositoryRedis.save(anagraficaBean);
         anagraficaMemcached.save(anagraficaBean);
         return anagraficaBean;
     }
@@ -73,11 +67,11 @@ public class AnagraficaServiceImpl implements AnagraficaService {
     }
 
     @Override
-    public boolean deleteAnagrafica(Long id) {
+    public boolean deleteAnagrafica(Long id) throws IOException {
         AtomicBoolean condition = new AtomicBoolean(false);
-        Optional<AnagraficaBean> result_query_redis = anagraficaRepositoryRedis.findById(id);
-        result_query_redis.ifPresent(a->{
-            anagraficaRepositoryRedis.deleteById(id);
+        Optional<AnagraficaBean> result_query_mem = anagraficaMemcached.findById(id);
+        result_query_mem.ifPresent(a->{
+            anagraficaMemcached.deleteById(id);
         });
         Optional<Anagrafica> anagrafica = anagraficaRepository.findById(id);
         anagrafica.ifPresent(a->{
@@ -89,18 +83,15 @@ public class AnagraficaServiceImpl implements AnagraficaService {
 
     @Override
     public AnagraficaBean anagraficaById(Long id) throws IOException {
-        AnagraficaBean anagraficaBeanMem = anagraficaMemcached.findById(id);
-        return anagraficaBeanMem;
-        /*
-        Optional<AnagraficaBean> result_query_redis = anagraficaRepositoryRedis.findById(id);
-        if (result_query_redis.isPresent()){
-            AnagraficaBean anagraficaRedis = new AnagraficaBean();
-            result_query_redis.ifPresent(q->{
-                anagraficaRedis.setIdana(q.getIdana());
-                anagraficaRedis.setNome(q.getNome());
-                anagraficaRedis.setCognome(q.getCognome());
+        Optional<AnagraficaBean> result_query_mem = anagraficaMemcached.findById(id);
+        if (result_query_mem.isPresent()){
+            AnagraficaBean anagraficaMem = new AnagraficaBean();
+            result_query_mem.ifPresent(q->{
+                anagraficaMem.setIdana(q.getIdana());
+                anagraficaMem.setNome(q.getNome());
+                anagraficaMem.setCognome(q.getCognome());
             });
-            return anagraficaRedis;
+            return anagraficaMem;
         } else{
             Optional<Anagrafica> result_query = anagraficaRepository.findById(id);
             final Anagrafica anagrafica = new Anagrafica();
@@ -117,7 +108,6 @@ public class AnagraficaServiceImpl implements AnagraficaService {
             }
         }
 
-         */
     }
 
 

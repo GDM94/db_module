@@ -8,6 +8,7 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +18,7 @@ public class IndirizziResolver {
     IndrizzoService idrizzoService;
 
     @GraphQLQuery
-    public IndirizziBean indirizzoById(Long id){
+    public IndirizziBean indirizzoById(Long id) throws IOException {
         return idrizzoService.indirizzoById(id);
     }
 
@@ -28,7 +29,7 @@ public class IndirizziResolver {
 
 
     @GraphQLMutation
-    public IndirizziBean newIndirizzo( Long idana, String descrizione){
+    public IndirizziBean newIndirizzo( Long idana, String descrizione) throws IOException {
         return  idrizzoService.newIndirizzo(idana, descrizione);
     }
 
@@ -38,7 +39,7 @@ public class IndirizziResolver {
     }
 
     @GraphQLMutation
-    public boolean deleteIndirizzo(Long id){
+    public boolean deleteIndirizzo(Long id) throws IOException {
         return idrizzoService.deleteIndirizzo(id);
     }
 }

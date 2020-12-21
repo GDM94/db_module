@@ -1,6 +1,7 @@
 package com.example.demo2.services.impl;
 
 
+
 import com.example.communication.bean.AnagraficaBean;
 import com.example.communication.bean.IndirizziBean;
 import com.example.communication.model.Anagrafica;
@@ -8,17 +9,18 @@ import com.example.communication.model.Indirizzo;
 import com.example.demo2.DbModuleApplication;
 import com.example.demo2.repositories.AnagraficaRepository;
 import com.example.demo2.repositories.IndirizzoRepository;
-import com.example.demo2.repositories.redis.AnagraficaRepositoryRedis;
-import com.example.demo2.repositories.redis.IndirizziRepositoryRedis;
 import com.example.demo2.services.IndrizzoService;
 import com.example.demo2.services.mapper.AnagraficaMapper;
 import com.example.demo2.services.mapper.IndirizziMapper;
+import com.example.demo2.services.memcached.AnagraficaMemcached;
+import com.example.demo2.services.memcached.IndirizzoMemcached;
 import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -34,10 +36,10 @@ public class IndirizzoServiceImpl implements IndrizzoService {
     private AnagraficaRepository anagraficaRepository;
 
     @Autowired
-    private IndirizziRepositoryRedis indirizziRepositoryRedis;
+    private IndirizzoMemcached indirizzoMemcached;
 
     @Autowired
-    private AnagraficaRepositoryRedis anagraficaRepositoryRedis;
+    private AnagraficaMemcached anagraficaMemcached;
 
     private final IndirizziMapper indirizziMapper= Mappers.getMapper(IndirizziMapper.class);
     private AnagraficaMapper anagraficaMapper= Mappers.getMapper(AnagraficaMapper.class);
@@ -45,15 +47,20 @@ public class IndirizzoServiceImpl implements IndrizzoService {
     private static final Logger logger = LoggerFactory.getLogger(DbModuleApplication.class);
 
     @Override
-    public IndirizziBean indirizzoById(Long id){
-        Optional<IndirizziBean> result_query_redis = indirizziRepositoryRedis.findById(id);
-        if (result_query_redis.isPresent()){
+    public IndirizziBean indirizzoById(Long id) throws IOException {
+        Optional<IndirizziBean> result_query_mem = indirizzoMemcached.findById(id);
+        if (result_query_mem.isPresent()){
             IndirizziBean indirizziBean = new IndirizziBean();
-            result_query_redis.ifPresent(q->{
+            result_query_mem.ifPresent(q->{
                 indirizziBean.setIdaddress(q.getIdaddress());
                 indirizziBean.setIdana(q.getIdana());
                 indirizziBean.setDescrizione(q.getDescrizione());
-                Optional<AnagraficaBean> anagraficaBean = anagraficaRepositoryRedis.findById(q.getIdana());
+                Optional<AnagraficaBean> anagraficaBean = null;
+                try {
+                    anagraficaBean = anagraficaMemcached.findById(q.getIdana());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 anagraficaBean.ifPresent(a->{
                     indirizziBean.setAnagrafica(a);
                 });
@@ -100,14 +107,14 @@ public class IndirizzoServiceImpl implements IndrizzoService {
     }
 
     @Override
-    public IndirizziBean newIndirizzo( Long idana, String descrizione){
+    public IndirizziBean newIndirizzo( Long idana, String descrizione) throws IOException {
         Indirizzo indirizzo = new Indirizzo();
         indirizzo.setIdana(idana);
         indirizzo.setDescrizione(descrizione);
         Date date = new Date();
         indirizzo.setDate_create(date);
         indirizzo.setDate_agg(date);
-        Optional<AnagraficaBean> anagraficaBean = anagraficaRepositoryRedis.findById(idana);
+        Optional<AnagraficaBean> anagraficaBean = anagraficaMemcached.findById(idana);
         if (anagraficaBean.isPresent()){
             anagraficaBean.ifPresent(a->{
                 Anagrafica anagrafica = anagraficaMapper.beanToEntity(a);
@@ -118,12 +125,16 @@ public class IndirizzoServiceImpl implements IndrizzoService {
             anagrafica.ifPresent(ana -> {
                 indirizzo.setAnagrafica(ana);
                 AnagraficaBean anagraficaBean1 = anagraficaMapper.entityToBean(ana);
-                anagraficaRepositoryRedis.save(anagraficaBean1);
+                try {
+                    anagraficaMemcached.save(anagraficaBean1);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             });
         }
         indirizzoRepository.save(indirizzo);
         IndirizziBean indirizziBean = indirizziMapper.entityToBean(indirizzo);
-        indirizziRepositoryRedis.save(indirizziBean);
+        indirizzoMemcached.save(indirizziBean);
         return indirizziBean;
     }
 
@@ -156,7 +167,13 @@ public class IndirizzoServiceImpl implements IndrizzoService {
     }
 
     @Override
-    public boolean deleteIndirizzo(Long id){
+    public boolean deleteIndirizzo(Long id) throws IOException {
+
+        Optional<IndirizziBean> result_query_mem = indirizzoMemcached.findById(id);
+        result_query_mem.ifPresent(a->{
+            indirizzoMemcached.deleteById(id);
+        });
+
         Optional<Indirizzo> indirizzo = indirizzoRepository.findById(id);
         AtomicBoolean condition = new AtomicBoolean(false);
         indirizzo.ifPresent(i->{
