@@ -15,6 +15,7 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +36,7 @@ public class AnagraficaServiceImpl implements AnagraficaService {
     private AnagraficaMapper anagraficaMapper= Mappers.getMapper(AnagraficaMapper.class);
 
     @Override
-    public AnagraficaBean newAnagrafica(String nome, String cognome) {
+    public AnagraficaBean newAnagrafica(String nome, String cognome) throws IOException {
         Anagrafica anagrafica = new Anagrafica();
         anagrafica.setNome(nome);
         anagrafica.setCognome(cognome);
@@ -87,7 +88,7 @@ public class AnagraficaServiceImpl implements AnagraficaService {
     }
 
     @Override
-    public AnagraficaBean anagraficaById(Long id) {
+    public AnagraficaBean anagraficaById(Long id) throws IOException {
         AnagraficaBean anagraficaBeanMem = anagraficaMemcached.findById(id);
         return anagraficaBeanMem;
         /*
