@@ -99,6 +99,17 @@ public class IndirizzoServiceImpl implements IndrizzoService {
         return indirizziBeans;
     }
 
+    /*
+    List<Indirizzo> indirizzos = indirizzoRepository.findAll()
+    indirizzos.forEach(i -> {
+        Optional<Anagrafica> ana = anagraficaRepository.findById(i.getIdana);
+        if(anagrafica.getId() == id) {
+        idaddress_toDelete = i.getId();
+        indirizzoRepository.deleteById(idaddress_toDelete)
+
+
+         */
+
     @Override
     public IndirizziBean newIndirizzo( Long idana, String descrizione){
         Indirizzo indirizzo = new Indirizzo();

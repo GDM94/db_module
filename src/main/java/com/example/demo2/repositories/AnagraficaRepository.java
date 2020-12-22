@@ -15,6 +15,8 @@ public interface AnagraficaRepository extends JpaRepository<Anagrafica, Long> {
             nativeQuery = true)
     List<String> getName_Numero(@Param("id") long id);
 
+
+
     @Modifying
     @Transactional
     @Query(value = "UPDATE anagrafica SET nome = :nome  WHERE idana = :id",

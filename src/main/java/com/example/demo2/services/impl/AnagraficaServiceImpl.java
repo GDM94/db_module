@@ -4,8 +4,12 @@ package com.example.demo2.services.impl;
 import com.example.communication.bean.AnagraficaBean;
 import com.example.communication.model.Anagrafica;
 
+import com.example.communication.model.Indirizzo;
 import com.example.demo2.repositories.AnagraficaRepository;
+import com.example.demo2.repositories.IndirizzoRepository;
+import com.example.demo2.repositories.RecapitiRepository;
 import com.example.demo2.repositories.redis.AnagraficaRepositoryRedis;
+import com.example.demo2.repositories.redis.IndirizziRepositoryRedis;
 import com.example.demo2.services.mapper.AnagraficaMapper;
 import com.example.demo2.services.AnagraficaService;
 import org.mapstruct.factory.Mappers;
@@ -15,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +32,16 @@ public class AnagraficaServiceImpl implements AnagraficaService {
     private AnagraficaRepository anagraficaRepository;
 
     @Autowired
+    private IndirizzoRepository indirizzoRepository;
+
+    @Autowired
+    private RecapitiRepository recapitiRepository;
+
+    @Autowired
     private AnagraficaRepositoryRedis anagraficaRepositoryRedis;
+
+    @Autowired
+    private IndirizziRepositoryRedis indirizziRepositoryRedis;
 
     private AnagraficaMapper anagraficaMapper= Mappers.getMapper(AnagraficaMapper.class);
 
@@ -84,6 +98,10 @@ public class AnagraficaServiceImpl implements AnagraficaService {
         Optional<AnagraficaBean> anaRedis = anagraficaRepositoryRedis.findById(id);
         AtomicBoolean condition = new AtomicBoolean(false);
         AtomicBoolean conditionRedis = new AtomicBoolean(false);
+
+        Optional<List<BigInteger>> idAddress = indirizzoRepository.findByIdana(id);
+        Optional<List<BigInteger>> idAddress2 = recapitiRepository.findByIdana(id);
+
         anagrafica.ifPresent(a->{
             anagraficaRepository.deleteById(id);
             condition.set(true);
@@ -97,8 +115,23 @@ public class AnagraficaServiceImpl implements AnagraficaService {
         if(conditionRedis.get() == true){
             logger.info("elemento eliminato dalla cache");
         }
-        return condition.get();
 
+        idAddress.ifPresent(i -> {
+                    i.forEach(j -> {
+                        indirizziRepositoryRedis.deleteById(j.longValue());
+                    });
+                }
+        );
+
+
+        idAddress2.ifPresent(i -> {
+            i.forEach(j -> {
+                indirizziRepositoryRedis.deleteById(j.longValue());
+            });
+        }
+        );
+
+        return condition.get();
 
     }
 
