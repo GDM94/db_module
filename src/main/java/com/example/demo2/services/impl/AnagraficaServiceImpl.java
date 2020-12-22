@@ -9,6 +9,9 @@ import com.example.demo2.repositories.redis.AnagraficaRepositoryRedis;
 import com.example.demo2.services.mapper.AnagraficaMapper;
 import com.example.demo2.services.AnagraficaService;
 import org.mapstruct.factory.Mappers;
+import org.slf4j.ILoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +31,8 @@ public class AnagraficaServiceImpl implements AnagraficaService {
 
     private AnagraficaMapper anagraficaMapper= Mappers.getMapper(AnagraficaMapper.class);
 
+    public Logger logger = LoggerFactory.getLogger(AnagraficaServiceImpl.class);
+
     @Override
     public AnagraficaBean newAnagrafica(String nome, String cognome) {
         Anagrafica anagrafica = new Anagrafica();
@@ -46,6 +51,7 @@ public class AnagraficaServiceImpl implements AnagraficaService {
     @Override
     public AnagraficaBean updateAnagrafica(Long id, String nome, String cognome) {
         Optional<Anagrafica> result_query = anagraficaRepository.findById(id);
+        Optional<AnagraficaBean> result_query_redis = anagraficaRepositoryRedis.findById(id);
         Date date = new Date();
         Anagrafica anagrafica = new Anagrafica();
         result_query.ifPresent(a -> {
@@ -57,23 +63,43 @@ public class AnagraficaServiceImpl implements AnagraficaService {
             anagraficaRepository.save(anagrafica);
         });
 
-        if (result_query.isPresent()) {
+
+        if(result_query.isPresent()) {
+
             AnagraficaBean anagraficaBean = anagraficaMapper.entityToBean(anagrafica);
-            return anagraficaBean;
+            anagraficaRepositoryRedis.save(anagraficaBean);
+        return anagraficaBean;
+
         }else {
-            return null;
+
+            AnagraficaBean ananull = new AnagraficaBean();
+            return ananull;
         }
+
     }
 
     @Override
     public boolean deleteAnagrafica(Long id) {
         Optional<Anagrafica> anagrafica = anagraficaRepository.findById(id);
+        Optional<AnagraficaBean> anaRedis = anagraficaRepositoryRedis.findById(id);
         AtomicBoolean condition = new AtomicBoolean(false);
+        AtomicBoolean conditionRedis = new AtomicBoolean(false);
         anagrafica.ifPresent(a->{
             anagraficaRepository.deleteById(id);
             condition.set(true);
+
         });
+        anaRedis.ifPresent(a->{
+            anagraficaRepositoryRedis.deleteById(id);
+            conditionRedis.set(true);
+        });
+
+        if(conditionRedis.get() == true){
+            logger.info("elemento eliminato dalla cache");
+        }
         return condition.get();
+
+
     }
 
     @Override
@@ -101,7 +127,8 @@ public class AnagraficaServiceImpl implements AnagraficaService {
                 AnagraficaBean anagraficaBean = anagraficaMapper.entityToBean(anagrafica);
                 return anagraficaBean;
             }else {
-                return null;
+                AnagraficaBean ananull = new AnagraficaBean();
+                return ananull;
             }
         }
     }
