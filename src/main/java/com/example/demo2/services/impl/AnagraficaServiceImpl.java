@@ -104,7 +104,8 @@ public class AnagraficaServiceImpl implements AnagraficaService {
                 AnagraficaBean anagraficaBean = anagraficaMapper.entityToBean(anagrafica);
                 return anagraficaBean;
             }else {
-                return null;
+                AnagraficaBean anagraficaBean = new AnagraficaBean();
+                return anagraficaBean;
             }
         }
 

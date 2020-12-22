@@ -84,7 +84,7 @@ public class IndirizzoServiceImpl implements IndrizzoService {
                 IndirizziBean indirizziBean = indirizziMapper.entityToBean(indirizzo);
                 return indirizziBean;
             }else {
-                IndirizziBean indirizziBean = null;
+                IndirizziBean indirizziBean = new IndirizziBean();
                 return indirizziBean;
             }
         }
@@ -120,22 +120,33 @@ public class IndirizzoServiceImpl implements IndrizzoService {
                 Anagrafica anagrafica = anagraficaMapper.beanToEntity(a);
                 indirizzo.setAnagrafica(anagrafica);
             });
+            indirizzoRepository.save(indirizzo);
+            IndirizziBean indirizziBean = indirizziMapper.entityToBean(indirizzo);
+            indirizzoMemcached.save(indirizziBean);
+            return indirizziBean;
+
         }else {
             Optional<Anagrafica> anagrafica = anagraficaRepository.findById(idana);
-            anagrafica.ifPresent(ana -> {
-                indirizzo.setAnagrafica(ana);
-                AnagraficaBean anagraficaBean1 = anagraficaMapper.entityToBean(ana);
-                try {
-                    anagraficaMemcached.save(anagraficaBean1);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
+            if (anagrafica.isPresent()){
+                anagrafica.ifPresent(ana -> {
+                    indirizzo.setAnagrafica(ana);
+                    AnagraficaBean anagraficaBean1 = anagraficaMapper.entityToBean(ana);
+                    try {
+                        anagraficaMemcached.save(anagraficaBean1);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                indirizzoRepository.save(indirizzo);
+                IndirizziBean indirizziBean = indirizziMapper.entityToBean(indirizzo);
+                indirizzoMemcached.save(indirizziBean);
+                return indirizziBean;
+            }else{
+                IndirizziBean indirizziBean = new IndirizziBean();
+                return indirizziBean;
+            }
         }
-        indirizzoRepository.save(indirizzo);
-        IndirizziBean indirizziBean = indirizziMapper.entityToBean(indirizzo);
-        indirizzoMemcached.save(indirizziBean);
-        return indirizziBean;
     }
 
     @Override
