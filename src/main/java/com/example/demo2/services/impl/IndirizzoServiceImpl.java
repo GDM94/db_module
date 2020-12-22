@@ -79,7 +79,6 @@ public class IndirizzoServiceImpl implements IndrizzoService {
                 });
             });
 
-            logger.info(indirizzo.toString());
             if (result_query.isPresent()){
                 IndirizziBean indirizziBean = indirizziMapper.entityToBean(indirizzo);
                 return indirizziBean;
@@ -150,28 +149,28 @@ public class IndirizzoServiceImpl implements IndrizzoService {
     }
 
     @Override
-    public IndirizziBean updateIndirizzo(Long id, String descrizione){
+    public IndirizziBean updateIndirizzo(Long id, String descrizione) throws IOException {
         Optional<Indirizzo> result_query = indirizzoRepository.findById(id);
-        Date date = new Date();
-        Indirizzo indirizzo = new Indirizzo();
-        result_query.ifPresent(i -> {
-            indirizzo.setIdaddress(i.getIdaddress());
-            indirizzo.setIdana(i.getIdana());
-            indirizzo.setDescrizione(descrizione);
-            indirizzo.setDate_agg(date);
-            indirizzo.setDate_create(i.getDate_create());
-            Optional<Anagrafica> anagrafica_query = anagraficaRepository.findById(i.getIdana());
-            anagrafica_query.ifPresent(a->{
-                indirizzo.setAnagrafica(a);
-                indirizzoRepository.save(indirizzo);
-            });
-        });
-
         if (result_query.isPresent()){
+            Date date = new Date();
+            Indirizzo indirizzo = new Indirizzo();
+            result_query.ifPresent(i -> {
+                indirizzo.setIdaddress(i.getIdaddress());
+                indirizzo.setIdana(i.getIdana());
+                indirizzo.setDescrizione(descrizione);
+                indirizzo.setDate_agg(date);
+                indirizzo.setDate_create(i.getDate_create());
+                Optional<Anagrafica> anagrafica_query = anagraficaRepository.findById(i.getIdana());
+                anagrafica_query.ifPresent(a->{
+                    indirizzo.setAnagrafica(a);
+                    indirizzoRepository.save(indirizzo);
+                });
+            });
             IndirizziBean indirizziBean = indirizziMapper.entityToBean(indirizzo);
+            indirizzoMemcached.update(indirizziBean);
             return indirizziBean;
         }else {
-            IndirizziBean indirizziBean = null;
+            IndirizziBean indirizziBean = new IndirizziBean();
             return indirizziBean;
         }
 
@@ -179,19 +178,18 @@ public class IndirizzoServiceImpl implements IndrizzoService {
 
     @Override
     public boolean deleteIndirizzo(Long id) throws IOException {
-
+        AtomicBoolean condition_cache = new AtomicBoolean(true);
         Optional<IndirizziBean> result_query_mem = indirizzoMemcached.findById(id);
         result_query_mem.ifPresent(a->{
-            indirizzoMemcached.deleteById(id);
+            condition_cache.set(indirizzoMemcached.deleteById(id));
         });
-
         Optional<Indirizzo> indirizzo = indirizzoRepository.findById(id);
         AtomicBoolean condition = new AtomicBoolean(false);
         indirizzo.ifPresent(i->{
             indirizzoRepository.deleteById(id);
             condition.set(true);
         });
-        return condition.get();
+        return condition.get() && condition_cache.get();
     }
 
 

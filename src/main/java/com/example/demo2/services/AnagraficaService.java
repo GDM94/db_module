@@ -14,7 +14,7 @@ public interface AnagraficaService {
 
     public AnagraficaBean newAnagrafica(String nome, String cognome) throws IOException;
     public boolean deleteAnagrafica(Long id) throws IOException;
-    public AnagraficaBean updateAnagrafica(Long id, String nome, String cognome);
+    public AnagraficaBean updateAnagrafica(Long id, String nome, String cognome) throws IOException;
     public AnagraficaBean anagraficaById(Long id) throws IOException;
     public List<AnagraficaBean> anagraficaAll();
 

@@ -5,10 +5,14 @@ import com.example.communication.bean.AnagraficaBean;
 import com.example.communication.model.Anagrafica;
 
 import com.example.demo2.repositories.AnagraficaRepository;
+import com.example.demo2.services.impl.memcached.AnagraficaMemcahedImpl;
 import com.example.demo2.services.mapper.AnagraficaMapper;
 import com.example.demo2.services.AnagraficaService;
 import com.example.demo2.services.memcached.AnagraficaMemcached;
+import com.example.demo2.services.memcached.IndirizzoMemcached;
 import org.mapstruct.factory.Mappers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +28,15 @@ public class AnagraficaServiceImpl implements AnagraficaService {
     @Autowired
     private AnagraficaRepository anagraficaRepository;
 
-
     @Autowired
     private AnagraficaMemcached anagraficaMemcached;
 
+    @Autowired
+    private IndirizzoMemcached indirizzoMemcached;
+
     private AnagraficaMapper anagraficaMapper= Mappers.getMapper(AnagraficaMapper.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(AnagraficaServiceImpl.class);
 
     @Override
     public AnagraficaBean newAnagrafica(String nome, String cognome) throws IOException {
@@ -45,7 +53,7 @@ public class AnagraficaServiceImpl implements AnagraficaService {
     }
 
     @Override
-    public AnagraficaBean updateAnagrafica(Long id, String nome, String cognome) {
+    public AnagraficaBean updateAnagrafica(Long id, String nome, String cognome) throws IOException {
         Optional<Anagrafica> result_query = anagraficaRepository.findById(id);
         Date date = new Date();
         Anagrafica anagrafica = new Anagrafica();
@@ -60,6 +68,7 @@ public class AnagraficaServiceImpl implements AnagraficaService {
 
         if (result_query.isPresent()) {
             AnagraficaBean anagraficaBean = anagraficaMapper.entityToBean(anagrafica);
+            anagraficaMemcached.update(anagraficaBean);
             return anagraficaBean;
         }else {
             return null;
@@ -68,17 +77,19 @@ public class AnagraficaServiceImpl implements AnagraficaService {
 
     @Override
     public boolean deleteAnagrafica(Long id) throws IOException {
-        AtomicBoolean condition = new AtomicBoolean(false);
-        Optional<AnagraficaBean> result_query_mem = anagraficaMemcached.findById(id);
-        result_query_mem.ifPresent(a->{
-            anagraficaMemcached.deleteById(id);
-        });
+        AtomicBoolean condition_postgres = new AtomicBoolean(false);
+        anagraficaMemcached.deleteById(id);
+        indirizzoMemcached.deleteByIdana(id);
         Optional<Anagrafica> anagrafica = anagraficaRepository.findById(id);
-        anagrafica.ifPresent(a->{
+        if (anagrafica.isPresent()){
             anagraficaRepository.deleteById(id);
-            condition.set(true);
-        });
-        return condition.get();
+            condition_postgres.set(true);
+        }else {
+            logger.info(String.format("anagrafica with id: %s, does not exist", id.toString()));
+        }
+
+        return condition_postgres.get();
+
     }
 
     @Override
@@ -104,6 +115,7 @@ public class AnagraficaServiceImpl implements AnagraficaService {
                 AnagraficaBean anagraficaBean = anagraficaMapper.entityToBean(anagrafica);
                 return anagraficaBean;
             }else {
+                logger.info(String.format("anagrafica with id: %s, does not exist", id.toString()));
                 AnagraficaBean anagraficaBean = new AnagraficaBean();
                 return anagraficaBean;
             }

@@ -2,6 +2,7 @@ package com.example.demo2.services.impl.memcached;
 
 import com.example.communication.bean.IndirizziBean;
 import com.example.communication.model.Indirizzo;
+import com.example.demo2.repositories.IndirizzoRepository;
 import com.example.demo2.services.memcached.IndirizzoMemcached;
 import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.internal.OperationFuture;
@@ -13,10 +14,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class IndirizzoMemcachedImpl implements IndirizzoMemcached {
+
+    @Autowired
+    IndirizzoRepository indirizzoRepository;
 
     @Autowired
     MemcachedClient memcachedClient;
@@ -35,12 +40,11 @@ public class IndirizzoMemcachedImpl implements IndirizzoMemcached {
         Object object = memcachedClient.get(key);
         IndirizziBean indirizziBean = null;
         try {
-            //logger.info("get memcached");
-            //logger.info(object.toString());
-            //logger.info(String.valueOf(object.getClass()));
             indirizziBean = Obj.readValue(object.toString(), IndirizziBean.class);
+            logger.info(String.format("indirizzo with id: %s is present in cache", idaddress.toString()));
             return Optional.ofNullable(indirizziBean);
         } catch (Exception e) {
+            logger.info(String.format("indirizzo with id: %s is NOT present in cache", idaddress.toString()));
           return Optional.ofNullable(indirizziBean);
         }
     }
@@ -50,15 +54,32 @@ public class IndirizzoMemcachedImpl implements IndirizzoMemcached {
         String jsonStr = Obj.writeValueAsString(indirizzoBean);
         OperationFuture<Boolean> c = memcachedClient.set(key, expiration, jsonStr);
         if (c.getStatus().isSuccess()){
-            logger.info("memcached set success");
+            logger.info("indirizzo saved success in cache");
         }else{
-            logger.info("memcached set failed");
+            logger.info("indirizzo saved failed in cache");
         }
     }
 
     public Boolean deleteById(Long id) {
         String key = prefix + "_" + id.toString();
-        return memcachedClient.delete(key).isDone();
+        OperationFuture<Boolean> delete = memcachedClient.delete(key);
+        return delete.getStatus().isSuccess();
+    }
+
+    public void update(IndirizziBean indirizziBean) throws IOException {
+        boolean delete_condition = this.deleteById(indirizziBean.getIdaddress());
+        if (delete_condition){
+            this.save(indirizziBean);
+        }
+    }
+
+    public void deleteByIdana(Long idana){
+        List<Long> idaddress_list = indirizzoRepository.getIdaddressByIdana(idana);
+        logger.info(idaddress_list.toString());
+        logger.info(String.valueOf(idaddress_list.getClass()));
+        idaddress_list.forEach(i->{
+            Boolean c = this.deleteById(i);
+        });
     }
 
 

@@ -35,16 +35,11 @@ public class AnagraficaMemcahedImpl implements AnagraficaMemcached {
         Object object = memcachedClient.get(key);
         AnagraficaBean anagraficaBean = null;
         try {
-            /*
-            logger.info("get memcached");
-            logger.info(object.toString());
-            logger.info(String.valueOf(object.getClass()));
-
-             */
             anagraficaBean = Obj.readValue(object.toString(), AnagraficaBean.class);
+            logger.info(String.format("anagrafica with id: %s is present in cache", idana.toString()));
             return Optional.ofNullable(anagraficaBean);
         } catch (Exception e) {
-
+            logger.info(String.format("anagrafica with id: %s is NOT present in cache", idana.toString()));
             return Optional.ofNullable(anagraficaBean);
 
         }
@@ -55,15 +50,24 @@ public class AnagraficaMemcahedImpl implements AnagraficaMemcached {
         String jsonStr = Obj.writeValueAsString(anagraficaBean);
         OperationFuture<Boolean> c = memcachedClient.set(key, expiration, jsonStr);
         if (c.getStatus().isSuccess()){
-            logger.info("memcached set success");
+            logger.info("memcached saved success");
         }else{
-            logger.info("memcached set failed");
+            logger.info("memcached saved failed");
         }
     }
 
     public Boolean deleteById(Long id){
         String key = prefix+"_"+ id.toString();
-        return memcachedClient.delete(key).isDone();
+        OperationFuture<Boolean> delete = memcachedClient.delete(key);
+        logger.info("delete memcached status:");
+        logger.info(String.valueOf(delete.getStatus().isSuccess()));
+        return delete.getStatus().isSuccess();
+    }
 
+    public void update(AnagraficaBean anagraficaBean) throws IOException {
+        boolean delete_condition = this.deleteById(anagraficaBean.getIdana());
+        if (delete_condition){
+            this.save(anagraficaBean);
+        }
     }
 }

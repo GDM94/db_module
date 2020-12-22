@@ -25,7 +25,7 @@ public class AnagraficaResolver {
     }
 
     @GraphQLMutation
-    public AnagraficaBean updateAnagrafica(Long id, String nome, String cognome) {
+    public AnagraficaBean updateAnagrafica(Long id, String nome, String cognome) throws IOException {
         return anagraficaService.updateAnagrafica(id, nome, cognome);
     }
 

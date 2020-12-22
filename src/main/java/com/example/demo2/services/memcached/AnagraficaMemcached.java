@@ -10,5 +10,6 @@ public interface AnagraficaMemcached {
     public Optional<AnagraficaBean> findById(Long idana) throws IOException;
     void save(AnagraficaBean anagraficaBean) throws IOException;
     Boolean deleteById(Long idana);
+    void update(AnagraficaBean anagraficaBean) throws IOException;
 
 }

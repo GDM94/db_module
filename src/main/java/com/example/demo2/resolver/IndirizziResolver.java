@@ -34,7 +34,7 @@ public class IndirizziResolver {
     }
 
     @GraphQLMutation
-    public IndirizziBean updateIndirizzo(Long id, String descrizione){
+    public IndirizziBean updateIndirizzo(Long id, String descrizione) throws IOException {
         return idrizzoService.updateIndirizzo(id, descrizione);
     }
 
