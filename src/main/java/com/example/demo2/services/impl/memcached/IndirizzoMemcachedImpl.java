@@ -4,6 +4,7 @@ import com.example.communication.bean.IndirizziBean;
 import com.example.communication.model.Indirizzo;
 import com.example.demo2.services.memcached.IndirizzoMemcached;
 import net.spy.memcached.MemcachedClient;
+import net.spy.memcached.internal.OperationFuture;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +48,8 @@ public class IndirizzoMemcachedImpl implements IndirizzoMemcached {
     public void save(IndirizziBean indirizzoBean) throws IOException {
         String key = prefix+"_"+indirizzoBean.getIdaddress().toString();
         String jsonStr = Obj.writeValueAsString(indirizzoBean);
-        boolean c = memcachedClient.set(key, expiration, jsonStr).isDone();
-        if (c==true){
+        OperationFuture<Boolean> c = memcachedClient.set(key, expiration, jsonStr);
+        if (c.getStatus().isSuccess()){
             logger.info("memcached set success");
         }else{
             logger.info("memcached set failed");

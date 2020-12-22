@@ -4,6 +4,7 @@ import com.example.communication.bean.AnagraficaBean;
 import com.example.demo2.services.memcached.AnagraficaMemcached;
 
 import net.spy.memcached.MemcachedClient;
+import net.spy.memcached.internal.OperationFuture;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +53,8 @@ public class AnagraficaMemcahedImpl implements AnagraficaMemcached {
     public void save(AnagraficaBean anagraficaBean) throws IOException {
         String key = prefix+"_"+anagraficaBean.getIdana().toString();
         String jsonStr = Obj.writeValueAsString(anagraficaBean);
-        boolean c = memcachedClient.set(key, expiration, jsonStr).isDone();
-        if (c==true){
+        OperationFuture<Boolean> c = memcachedClient.set(key, expiration, jsonStr);
+        if (c.getStatus().isSuccess()){
             logger.info("memcached set success");
         }else{
             logger.info("memcached set failed");
